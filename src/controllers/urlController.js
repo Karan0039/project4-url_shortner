@@ -21,7 +21,7 @@ const createShortUrl = async function (req, res) {
         if (!validUrl.isUri(requestBody.longUrl))
             return res.status(400).send({ status: false, message: "Enter valid url" })
 
-        //requestBody.urlCode=(parseInt(Math.random()*10**8)).toString(36)
+        //requestBody.urlCode=(parseInt(Math.random()*10**16)).toString(36) // Creating urlCode
 
         requestBody.urlCode = nanoId.nanoid(); //  URL CODE CREATION
 
