@@ -3,6 +3,10 @@ const nanoId = require("nanoid")
 const validUrl = require("valid-url")
 const redis = require("redis");
 const { promisify } = require("util");
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9f9e3291db47b1b8b5098312b6ec722666623685
 
 const isValid = function (value) {
     if (typeof value === "undefined" || typeof value === null) return false
@@ -12,11 +16,19 @@ const isValid = function (value) {
 
 //Connect to redis
 const redisClient = redis.createClient(
+<<<<<<< HEAD
     13190,
     "redis-13190.c301.ap-south-1-1.ec2.cloud.redislabs.com",
     { no_ready_check: true }
 );
 redisClient.auth("gkiOIPkytPI3ADi14jHMSWkZEo2J5TDG", function (err) {
+=======
+    16932,
+    "redis-16932.c93.us-east-1-3.ec2.cloud.redislabs.com",
+    { no_ready_check: true }
+);
+redisClient.auth("foaM5sKgh2GmTqPmPUuCbOLnabnoRuEw", function (err) {
+>>>>>>> 9f9e3291db47b1b8b5098312b6ec722666623685
     if (err) throw err;
 });
 
@@ -43,7 +55,10 @@ const fetchAuthorProfile = async function (req, res) {
     }
 
 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9f9e3291db47b1b8b5098312b6ec722666623685
 const createShortUrl = async function (req, res) {
     try {
         let requestBody = req.body
