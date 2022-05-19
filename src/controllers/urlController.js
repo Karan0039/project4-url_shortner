@@ -55,9 +55,9 @@ const createShortUrl = async function (req, res) {
             }
         }
         //  IF ALL THING ALLREADY EXIST  FOR SAME URL
-        let existUrl = await GET_ASYNC(`${requestBody.urlCode}`)
+        let existUrl = await GET_ASYNC(`${requestBody.longUrl}`)
         if (existUrl)
-            return res.status(200).send({ status: true, data: data(existUrl) })
+            return res.status(200).send({ status: true, data: data(JSON.parse(existUrl)) })
 
         existUrl = await urlModel.findOne({ longUrl: requestBody.longUrl });
         if (existUrl)
@@ -66,14 +66,14 @@ const createShortUrl = async function (req, res) {
         //  document creation in DB
         const urlCreated = await urlModel.create(requestBody);
         //  adding document to cache
-        await SET_ASYNC(`${requestBody.urlCode}`, JSON.stringify(urlCreated))
+        await SET_ASYNC(`${requestBody.longUrl}`, JSON.stringify(urlCreated))
         res.status(201).send({ status: true, data: data(urlCreated) });
     }
     catch (err) {
         res.status(500).send({ status: false, message: err.message })
     }
 };
-
+ 
 //  2.
 const getUrl = async function (req, res) {
     try {
