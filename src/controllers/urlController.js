@@ -36,6 +36,9 @@ const createShortUrl = async function (req, res) {
         //  IF BODY  NOT PRESENT
         if (Object.keys(requestBody).length == 0)
             return res.status(400).send({ status: false, message: "Enter data in body" })
+
+        if (!requestBody.longUrl)
+            return res.status(400).send({ status: false, message: "longUrl is required" })
         //   URL  VALIDATION
         if (!isValid(requestBody.longUrl))
             return res.status(400).send({ status: false, message: "Enter Url in LongUrl key" })
@@ -73,7 +76,7 @@ const createShortUrl = async function (req, res) {
         res.status(500).send({ status: false, message: err.message })
     }
 };
- 
+
 //  2.
 const getUrl = async function (req, res) {
     try {
