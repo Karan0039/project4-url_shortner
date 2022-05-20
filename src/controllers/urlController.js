@@ -48,19 +48,17 @@ const createShortUrl = async function (req, res) {
         if (Object.keys(requestBody).length == 0)
             return res.status(400).send({ status: false, message: "Enter data in body" })
 
-        if (!requestBody.longUrl)
-            return res.status(400).send({ status: false, message: "longUrl is required" })
         //   URL  VALIDATION
         if (!isValid(requestBody.longUrl))
             return res.status(400).send({ status: false, message: "Enter Url in LongUrl key" })
 
-        if (!validUrl.isUri(requestBody.longUrl))
+        // if (!validUrl.isUri(requestBody.longUrl))
+        //     return res.status(400).send({ status: false, message: "Enter valid url" });
+        let regx = /^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})?$/;
+        if (!regx.test(requestBody.longUrl)) {
             return res.status(400).send({ status: false, message: "Enter valid url" })
-
-        //requestBody.urlCode=(parseInt(Math.random()*10**16)).toString(36) // Creating urlCode
-        requestBody.urlCode = nanoId.nanoid(); //  URL CODE CREATION
-        requestBody.shortUrl = "http://localhost:3000/" + requestBody.urlCode; // URL  SHORTING  CONCATINAION  
-
+        }
+        //  FUNCTION  FOR MAKING  RESPONSE
         let data = function (document) {
             return {
                 longUrl: document.longUrl,
@@ -68,19 +66,24 @@ const createShortUrl = async function (req, res) {
                 urlCode: document.urlCode
             }
         }
-        //  IF ALL THING ALLREADY EXIST  FOR SAME URL
+        //  IF  DATA  EXIST  IN CACHE
         let existUrl = await GET_ASYNC(`${requestBody.longUrl}`)
         if (existUrl)
-            return res.status(200).send({ status: true, data: data(JSON.parse(existUrl)) })
+            return res.status(200).send({ status: true, data: data(JSON.parse(existUrl)) });
 
+        //  IF ALL THING ALLREADY EXIST  FOR SAME URL  IN DB
         existUrl = await urlModel.findOne({ longUrl: requestBody.longUrl });
-        if (existUrl)
-            return res.status(200).send({ status: true, data: data(existUrl) })
+        if (existUrl) {
+            await SET_ASYNC(`${requestBody.longUrl}`, JSON.stringify(existUrl));  //  SAVING  IN CACHE AFTET FINDING  FROM DB
+            return res.status(200).send({ status: true, data: data(existUrl) });
+        }
 
-        //  document creation in DB
+        //requestBody.urlCode=(parseInt(Math.random()*10**16)).toString(36) // Creating urlCode
+        //  DOCUMENT CREATION  IN  DB
+        requestBody.urlCode = nanoId.nanoid(); //  URL CODE CREATION
+        requestBody.shortUrl = "http://localhost:3000/" + requestBody.urlCode; // URL  SHORTING  CONCATINAION
         const urlCreated = await urlModel.create(requestBody);
-        //  adding document to cache
-        await SET_ASYNC(`${requestBody.longUrl}`, JSON.stringify(urlCreated))
+        await SET_ASYNC(`${requestBody.longUrl}`, JSON.stringify(urlCreated));  //  ADDING  DOC  IN CACHE 
         res.status(201).send({ status: true, data: data(urlCreated) });
     }
     catch (err) {
@@ -91,19 +94,21 @@ const createShortUrl = async function (req, res) {
 //  2.
 const getUrl = async function (req, res) {
     try {
-        //  cheking data in cache 
+        const reqParams = req.params.urlCode
+        // CHECKING  DATA EXISTANCE  IN CACHE
         let url = await GET_ASYNC(`${req.params.urlCode}`)
         if (url) {
-            res.redirect(JSON.parse(url).longUrl)
+            const a = JSON.parse(url).longUrl
+            return res.status(302).redirect(a)
         } else {
-            //  checking data in DB
+            //  CHECKING  DATA EXISTANCE  IN DB
             let url = await urlModel.findOne({ urlCode: req.params.urlCode });
-            //when data not found
+            // IF  DOC  NOT  FOUND  IN  DB
             if (!url)
                 return res.status(404).send({ status: false, message: "Url Not Found for Given UrlCode" });
-            //  adding data in cache is document found in DB
+            //  ADDING  IN  CACHE IF DOC FOUND  IN  DB
             await SET_ASYNC(`${req.params.urlCode}`, JSON.stringify(url))
-            res.redirect(url.longUrl);
+            res.status(302).redirect(url.longUrl);
         }
     }
     catch (err) {
