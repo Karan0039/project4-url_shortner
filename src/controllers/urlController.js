@@ -48,8 +48,7 @@ const createShortUrl = async function (req, res) {
 
         //requestBody.urlCode=(parseInt(Math.random()*10**16)).toString(36) // Creating urlCode
         requestBody.urlCode = nanoId.nanoid(); //  URL CODE CREATION
-        requestBody.shortUrl = "http://localhost:3000/" + requestBody.urlCode; // URL  SHORTING  CONCATINAION  
-
+        requestBody.shortUrl = "http://localhost:3000/" + requestBody.urlCode; // URL  SHORTING  CONCATINAION 
         let data = function (document) {
             return {
                 longUrl: document.longUrl,
