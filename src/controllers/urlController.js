@@ -47,6 +47,9 @@ const createShortUrl = async function (req, res) {
         //  IF BODY  NOT PRESENT
         if (Object.keys(requestBody).length == 0)
             return res.status(400).send({ status: false, message: "Enter data in body" })
+
+        if (!requestBody.longUrl)
+            return res.status(400).send({ status: false, message: "longUrl is required" })
         //   URL  VALIDATION
         if (!isValid(requestBody.longUrl))
             return res.status(400).send({ status: false, message: "Enter Url in LongUrl key" })
@@ -66,9 +69,9 @@ const createShortUrl = async function (req, res) {
             }
         }
         //  IF ALL THING ALLREADY EXIST  FOR SAME URL
-        let existUrl = await GET_ASYNC(`${requestBody.urlCode}`)
+        let existUrl = await GET_ASYNC(`${requestBody.longUrl}`)
         if (existUrl)
-            return res.status(200).send({ status: true, data: data(existUrl) })
+            return res.status(200).send({ status: true, data: data(JSON.parse(existUrl)) })
 
         existUrl = await urlModel.findOne({ longUrl: requestBody.longUrl });
         if (existUrl)
@@ -77,7 +80,7 @@ const createShortUrl = async function (req, res) {
         //  document creation in DB
         const urlCreated = await urlModel.create(requestBody);
         //  adding document to cache
-        await SET_ASYNC(`${requestBody.urlCode}`, JSON.stringify(urlCreated))
+        await SET_ASYNC(`${requestBody.longUrl}`, JSON.stringify(urlCreated))
         res.status(201).send({ status: true, data: data(urlCreated) });
     }
     catch (err) {
