@@ -69,13 +69,13 @@ const createShortUrl = async function (req, res) {
         //  IF  DATA  EXIST  IN CACHE
         let existUrl = await GET_ASYNC(`${requestBody.longUrl}`)
         if (existUrl)
-            return res.status(200).send({ status: true, data: data(JSON.parse(existUrl)) });
+            return res.status(200).send({ status: true, message: "Allready Created", data: data(JSON.parse(existUrl)) });
 
         //  IF ALL THING ALLREADY EXIST  FOR SAME URL  IN DB
         existUrl = await urlModel.findOne({ longUrl: requestBody.longUrl });
         if (existUrl) {
             await SET_ASYNC(`${requestBody.longUrl}`, JSON.stringify(existUrl));  //  SAVING  IN CACHE AFTET FINDING  FROM DB
-            return res.status(200).send({ status: true, data: data(existUrl) });
+            return res.status(200).send({ status: true, message: "Allready Created", data: data(existUrl) });
         }
 
         //requestBody.urlCode=(parseInt(Math.random()*10**16)).toString(36) // Creating urlCode
