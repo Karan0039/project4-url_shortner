@@ -28,19 +28,7 @@ redisClient.on("connect", async function () {
 const SET_ASYNC = promisify(redisClient.SET).bind(redisClient);
 const GET_ASYNC = promisify(redisClient.GET).bind(redisClient);
 
-
-const fetchAuthorProfile = async function (req, res) {
-    let cahcedProfileData = await GET_ASYNC(`${req.params.authorId}`)
-    if (cahcedProfileData) {
-        res.send(cahcedProfileData)
-    } else {
-        let profile = await authorModel.findById(req.params.authorId);
-        await SET_ASYNC(`${req.params.authorId}`, JSON.stringify(profile))
-        res.send({ data: profile });
-    }
-
-};
-
+//1.
 const createShortUrl = async function (req, res) {
     try {
         let requestBody = req.body
